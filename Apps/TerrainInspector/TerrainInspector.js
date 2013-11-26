@@ -20,7 +20,7 @@ require([
     centralBody.depthTestAgainstTerrain = true;
 
     centralBody.terrainProvider = new Cesium.CesiumMeshTerrainProvider({
-        url : 'http://c1200562-00.stk.com/terrain/tilesets/gtopo30/tiles'
+        url : 'http://localhost:59874/tilesets/2013-11-25/tiles'
     });
 
     var tp = new TitlePane({
@@ -32,6 +32,7 @@ require([
     document.getElementById("toolbar").appendChild(tp.domNode);
 
     domConstruct.place('<tr><td id="wireFrameToggle"></td><td>Wireframe</td></tr>\
+                        <tr><td id="showHorizonOcclusionPointToggle"></td><td>Show horizon occlusion points</td></tr>\
                         <tr><td id="updateLodToggle"></td><td>Suspend LOD update</td></tr>\
                         <tr><td id="showTileCoordinatesToggle"></td><td>Show tile coordinates</td></tr>\
                         <tr><td id="selectTileButton" colspan="2"></td></tr>\
@@ -46,9 +47,15 @@ require([
         checked: centralBody._surface.wireframe,
         onChange: function(b) {
             centralBody._surface._debug.wireframe = b;
-
         }
     }).placeAt('wireFrameToggle');
+
+    new CheckBox({
+        checked: centralBody._surface._debug.showHorizonOcclusionPoints,
+        onChange: function(b) {
+            centralBody._surface._debug.showHorizonOcclusionPoints = b;
+        }
+    }).placeAt('showHorizonOcclusionPointToggle');
 
     var suspendLodCheckbox = new CheckBox({
         checked: centralBody._surface._debug.suspendLodUpdate,

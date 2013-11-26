@@ -18,6 +18,7 @@ define([
         '../Renderer/DrawCommand',
         './ImageryLayer',
         './ImageryState',
+        './LabelCollection',
         './SceneMode',
         './TerrainProvider',
         './TileReplacementQueue',
@@ -42,6 +43,7 @@ define([
         DrawCommand,
         ImageryLayer,
         ImageryState,
+        LabelCollection,
         SceneMode,
         TerrainProvider,
         TileReplacementQueue,
@@ -100,6 +102,8 @@ define([
             enableDebugOutput : false,
             wireframe : false,
             boundingSphereTile : undefined,
+            showHorizonOcclusionPoints : false,
+            horizonOcclusionLabelCollection : undefined,
 
             maxDepth : 0,
             tilesVisited : 0,
@@ -119,11 +123,27 @@ define([
         };
     };
 
-    CentralBodySurface.prototype.update = function(context, frameState, colorCommandList, centralBodyUniformMap, shaderSet, renderState, projection) {
+    CentralBodySurface.prototype.update = function(context, frameState, commandList, colorCommandList, centralBodyUniformMap, shaderSet, renderState, projection) {
+        if (this._debug.showHorizonOcclusionPoints) {
+            if (!defined(this._debug.horizonOcclusionLabelCollection)) {
+                this._debug.horizonOcclusionLabelCollection = new LabelCollection();
+            }
+            this._debug.horizonOcclusionLabelCollection.removeAll();
+        } else {
+            if (defined(this._debug.horizonOcclusionLabelCollection)) {
+                this._debug.horizonOcclusionLabelCollection.destroy();
+                this._debug.horizonOcclusionLabelCollection = undefined;
+            }
+        }
+
         updateLayers(this);
         selectTilesForRendering(this, context, frameState);
         processTileLoadQueue(this, context, frameState);
         createRenderCommandsForSelectedTiles(this, context, frameState, shaderSet, projection, centralBodyUniformMap, colorCommandList, renderState);
+
+        if (defined(this._debug.horizonOcclusionLabelCollection)) {
+            this._debug.horizonOcclusionLabelCollection.update(context, frameState, commandList);
+        }
     };
 
     CentralBodySurface.prototype.getTerrainProvider = function() {
@@ -797,6 +817,8 @@ define([
     var centerEyeScratch = new Cartesian4();
 
     function createRenderCommandsForSelectedTiles(surface, context, frameState, shaderSet, projection, centralBodyUniformMap, colorCommandList, renderState) {
+        var ellipsoid = surface._terrainProvider.getTilingScheme().getEllipsoid();
+
         var viewMatrix = frameState.camera.viewMatrix;
 
         var maxTextures = context.getMaximumTextureImageUnits();
@@ -1012,6 +1034,14 @@ define([
 
                     command.boundingVolume = boundingVolume;
 
+                    if (defined(surface._debug.horizonOcclusionLabelCollection) && defined(tile.occludeePointInScaledSpace)) {
+                        surface._debug.horizonOcclusionLabelCollection.add({
+                            text : 'L' + tile.level + 'X' + tile.x + 'Y' + tile.y,
+                            position : Cartesian3.multiplyComponents(tile.occludeePointInScaledSpace, ellipsoid.getRadii()),
+                            font : '12px Arial',
+                            fillColor : { red: 1.0, green: 1.0, blue: 0.0 }
+                        });
+                    }
                 } while (imageryIndex < imageryLen);
             }
         }

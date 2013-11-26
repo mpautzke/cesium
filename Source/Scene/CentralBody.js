@@ -759,6 +759,7 @@ define([
             this._surface.setTerrainProvider(this.terrainProvider);
             this._surface.update(context,
                     frameState,
+                    commandList,
                     colorCommandList,
                     this._drawUniforms,
                     this._surfaceShaderSet,
