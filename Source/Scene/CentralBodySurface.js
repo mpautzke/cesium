@@ -656,6 +656,8 @@ define([
         surface._tileLoadQueue.push(tile);
     }
 
+    var timer = defined(window) && defined(window.performance) && defined(window.performance.now) ? window.performance : Date;
+
     function processTileLoadQueue(surface, context, frameState) {
         var tileLoadQueue = surface._tileLoadQueue;
         var terrainProvider = surface._terrainProvider;
@@ -669,7 +671,7 @@ define([
         // we're allowed to keep.
         surface._tileReplacementQueue.trimTiles(surface._tileCacheSize);
 
-        var startTime = Date.now();
+        var startTime = timer.now();
         var timeSlice = surface._loadQueueTimeSlice;
         var endTime = startTime + timeSlice;
 
@@ -679,7 +681,7 @@ define([
 
             tile.processStateMachine(context, terrainProvider, imageryLayerCollection);
 
-            if (Date.now() >= endTime) {
+            if (timer.now() >= endTime) {
                 break;
             }
         }
