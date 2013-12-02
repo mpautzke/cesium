@@ -20,7 +20,7 @@ require([
     centralBody.depthTestAgainstTerrain = true;
 
     centralBody.terrainProvider = new Cesium.CesiumMeshTerrainProvider({
-        url : 'http://localhost:59874/tilesets/2013-11-25/tiles'
+        url : 'http://localhost:59874/tilesets/high-water-mark-working-skirts/tiles'
     });
 
     var tp = new TitlePane({
