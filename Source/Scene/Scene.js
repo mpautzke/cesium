@@ -91,21 +91,16 @@ define([
      * @constructor
      *
      * @param {HTMLCanvasElement} canvas The HTML canvas element to create the scene for.
-     * @param {Object} [contextOptions=undefined] Properties corresponding to <a href='http://www.khronos.org/registry/webgl/specs/latest/#5.2'>WebGLContextAttributes</a> used to create the WebGL context.  Default values are shown in the code example below.
+     * @param {Object} [contextOptions=undefined] Context and WebGL creation properties corresponding to {@link Context#options}.
      * @param {HTMLElement} [creditContainer=undefined] The HTML element in which the credits will be displayed.
      *
      * @see CesiumWidget
      * @see <a href='http://www.khronos.org/registry/webgl/specs/latest/#5.2'>WebGLContextAttributes</a>
      *
      * @example
-     * // Create scene with default context options.
+     * // Create scene without anisotropic texture filtering
      * var scene = new Scene(canvas, {
-     *     alpha : false,
-     *     depth : true,
-     *     stencil : false,
-     *     antialias : true,
-     *     premultipliedAlpha : true,
-     *     preserveDrawingBuffer : false
+     *   allowTextureFilterAnisotropic : false
      * });
      */
     var Scene = function(canvas, contextOptions, creditContainer) {
@@ -531,15 +526,13 @@ define([
                     var command = commandList[k];
                     var boundingVolume = command.boundingVolume;
                     if (defined(boundingVolume)) {
-                        var modelMatrix = defaultValue(command.modelMatrix, Matrix4.IDENTITY);
-                        var transformedBV = boundingVolume.transform(modelMatrix);               //TODO: Remove this allocation.
                         if (command.cull &&
-                                ((cullingVolume.getVisibility(transformedBV) === Intersect.OUTSIDE) ||
-                                 (defined(occluder) && !occluder.isBoundingSphereVisible(transformedBV)))) {
+                                ((cullingVolume.getVisibility(boundingVolume) === Intersect.OUTSIDE) ||
+                                 (defined(occluder) && !occluder.isBoundingSphereVisible(boundingVolume)))) {
                             continue;
                         }
 
-                        distances = transformedBV.getPlaneDistances(position, direction, distances);
+                        distances = boundingVolume.getPlaneDistances(position, direction, distances);
                         near = Math.min(near, distances.start);
                         far = Math.max(far, distances.stop);
                     } else {
@@ -655,7 +648,7 @@ define([
                 });
             }
 
-            var m = Matrix4.multiplyByTranslation(defaultValue(command.modelMatrix, Matrix4.IDENTITY), command.boundingVolume.center);
+            var m = Matrix4.multiplyByTranslation(Matrix4.IDENTITY, command.boundingVolume.center);
             scene._debugSphere.modelMatrix = Matrix4.multiplyByUniformScale(m, command.boundingVolume.radius);
 
             var commandList = [];
@@ -679,14 +672,13 @@ define([
         }
         cullingVolume = scratchCullingVolume;
 
-        var modelMatrix = defaultValue(command.modelMatrix, Matrix4.IDENTITY);
-        var transformedBV = command.boundingVolume.transform(modelMatrix);               //TODO: Remove this allocation.
+        var boundingVolume = command.boundingVolume;
 
         return ((defined(command)) &&
                  ((!defined(command.boundingVolume)) ||
                   !command.cull ||
-                  ((cullingVolume.getVisibility(transformedBV) !== Intersect.OUTSIDE) &&
-                   (!defined(occluder) || occluder.isBoundingSphereVisible(transformedBV)))));
+                  ((cullingVolume.getVisibility(boundingVolume) !== Intersect.OUTSIDE) &&
+                   (!defined(occluder) || occluder.isBoundingSphereVisible(boundingVolume)))));
     }
 
     function executeCommands(scene, passState, clearColor) {

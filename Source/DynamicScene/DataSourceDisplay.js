@@ -16,6 +16,7 @@ define([
         './PolygonGeometryUpdater',
         './PolylineGeometryUpdater',
         './DynamicPyramidVisualizer',
+        './DynamicVectorVisualizer',
         './VisualizerCollection'
     ], function(
         defaultValue,
@@ -34,6 +35,7 @@ define([
         PolygonGeometryUpdater,
         PolylineGeometryUpdater,
         DynamicPyramidVisualizer,
+        DynamicVectorVisualizer,
         VisualizerCollection) {
     "use strict";
 
