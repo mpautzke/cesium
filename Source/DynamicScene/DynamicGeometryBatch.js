@@ -1,19 +1,19 @@
 /*global define*/
-define(['../Core/Dictionary'], function(Dictionary) {
+define(['../Core/Map'], function(Map) {
     "use strict";
 
     var DynamicGeometryBatch = function(primitives) {
         this._primitives = primitives;
-        this._items = new Dictionary();
+        this._items = new Map();
     };
 
     DynamicGeometryBatch.prototype.add = function(updater) {
-        this._items.add(updater.id, updater.createDynamicUpdater(this._primitives));
+        this._items.set(updater.id, updater.createDynamicUpdater(this._primitives));
     };
 
     DynamicGeometryBatch.prototype.remove = function(updater) {
         var id = updater.id;
-        var primitive = this._items.getValue(id);
+        var primitive = this._items.get(id);
         primitive.destroy();
         this._items.remove(id);
     };

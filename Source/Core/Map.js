@@ -5,25 +5,25 @@ define(['./defined',
         defined, DeveloperError) {
     "use strict";
 
-    var Dictionary = function() {
+    var Map = function() {
         this._array = [];
         this._hash = {};
     };
 
-    Dictionary.prototype.getValues = function() {
-        return this._array;
-    };
-
-    Dictionary.prototype.add = function(key, value) {
+    Map.prototype.set = function(key, value) {
         this._hash[key] = value;
         this._array.push(value);
     };
 
-    Dictionary.prototype.getValue = function(key) {
+    Map.prototype.get = function(key) {
         return this._hash[key];
     };
 
-    Dictionary.prototype.remove = function(key) {
+    Map.prototype.getValues = function() {
+        return this._array;
+    };
+
+    Map.prototype.remove = function(key) {
         var hasValue = defined(this._hash[key]);
         if (hasValue) {
             var array = this._array;
@@ -33,10 +33,10 @@ define(['./defined',
         return hasValue;
     };
 
-    Dictionary.prototype.removeAll = function() {
+    Map.prototype.removeAll = function() {
         this._hash = {};
         this._array.length = 0;
     };
 
-    return Dictionary;
+    return Map;
 });

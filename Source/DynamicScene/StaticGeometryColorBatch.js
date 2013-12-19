@@ -2,7 +2,7 @@
 define(['../Core/ColorGeometryInstanceAttribute',
         '../Core/defined',
         '../Core/DeveloperError',
-        '../Core/Dictionary',
+        '../Core/Map',
         '../Core/GeometryInstance',
         '../Core/ShowGeometryInstanceAttribute',
         '../Scene/Primitive'
@@ -10,7 +10,7 @@ define(['../Core/ColorGeometryInstanceAttribute',
         ColorGeometryInstanceAttribute,
         defined,
         DeveloperError,
-        Dictionary,
+        Map,
         GeometryInstance,
         ShowGeometryInstanceAttribute,
         Primitive) {
@@ -22,16 +22,16 @@ define(['../Core/ColorGeometryInstanceAttribute',
         this.primitives = primitives;
         this.createPrimitive = false;
         this.primitive = undefined;
-        this.geometry = new Dictionary();
-        this.updaters = new Dictionary();
+        this.geometry = new Map();
+        this.updaters = new Map();
     };
 
     Batch.prototype.add = function(updater) {
         var instance = updater.createGeometryInstance();
         var id = updater.id;
         this.createPrimitive = true;
-        this.geometry.add(id, instance);
-        this.updaters.add(id, updater);
+        this.geometry.set(id, instance);
+        this.updaters.set(id, updater);
     };
 
     Batch.prototype.remove = function(updater) {

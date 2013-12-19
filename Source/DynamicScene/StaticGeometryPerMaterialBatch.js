@@ -1,6 +1,6 @@
 /*global define*/
 define(['../Core/defined',
-        '../Core/Dictionary',
+        '../Core/Map',
         '../Core/GeometryInstance',
         '../Core/ShowGeometryInstanceAttribute',
         '../Scene/Primitive',
@@ -8,7 +8,7 @@ define(['../Core/defined',
         './MaterialProperty'
     ], function(
         defined,
-        Dictionary,
+        Map,
         GeometryInstance,
         ShowGeometryInstanceAttribute,
         Primitive,
@@ -18,11 +18,11 @@ define(['../Core/defined',
 
     var Batch = function(primitives, appearanceType, updater) {
         this._materialProperty = updater._materialProperty;
-        this._updaters = new Dictionary();
+        this._updaters = new Map();
         this._createPrimitive = true;
         this._primitive = undefined;
         this._primitives = primitives;
-        this._geometries = new Dictionary();
+        this._geometries = new Map();
         this._material = Material.fromType('Color');
         this._appearanceType = appearanceType;
         this.add(updater);
@@ -41,8 +41,8 @@ define(['../Core/defined',
     };
 
     Batch.prototype.add = function(updater) {
-        this._updaters.add(updater.id, updater);
-        this._geometries.add(updater.id, updater.createGeometryInstance());
+        this._updaters.set(updater.id, updater);
+        this._geometries.set(updater.id, updater.createGeometryInstance());
         this._createPrimitive = true;
     };
 

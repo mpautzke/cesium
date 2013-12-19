@@ -2,7 +2,7 @@
 define(['../Core/defined',
         '../Core/DeveloperError',
         '../Core/destroyObject',
-        '../Core/Dictionary',
+        '../Core/Map',
         '../Scene/PerInstanceColorAppearance',
         '../Scene/PolylineColorAppearance',
         '../Scene/MaterialAppearance',
@@ -17,7 +17,7 @@ define(['../Core/defined',
         defined,
         DeveloperError,
         destroyObject,
-        Dictionary,
+        Map,
         PerInstanceColorAppearance,
         PolylineColorAppearance,
         MaterialAppearance,
@@ -78,7 +78,7 @@ define(['../Core/defined',
         this._batches[GeometryBatchType.MATERIAL.value] = new StaticGeometryPerMaterialBatch(primitives, type.MaterialAppearanceType);
         this._batches[GeometryBatchType.DYNAMIC.value] = new DynamicGeometryBatch(primitives);
 
-        this._updaters = new Dictionary();
+        this._updaters = new Map();
         this.setDynamicObjectCollection(dynamicObjectCollection);
     };
 
@@ -149,7 +149,7 @@ define(['../Core/defined',
         for (i = removed.length - 1; i > -1; i--) {
             dynamicObject = removed[i];
             id = dynamicObject.id;
-            updater = this._updaters.getValue(id);
+            updater = this._updaters.get(id);
             batch = batches[updater.geometryType.value];
             if (defined(batch)) {
                 batch.remove(updater);
@@ -162,7 +162,7 @@ define(['../Core/defined',
         for (i = added.length - 1; i > -1; i--) {
             dynamicObject = added[i];
             id = dynamicObject.id;
-            this._updaters.add(id, new this._type(dynamicObject));
+            this._updaters.set(id, new this._type(dynamicObject));
         }
 
         addedObjects.removeAll();
