@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Cesium GIS Viewer Test</title>
+    <script src="cesium/CesiumUnminified/Cesium.js"></script>
+    <script src="gis-viewer/gis-viewer.js"></script>
+    <style>
+        @import url(cesium/CesiumUnminified/Widgets/widgets.css);
+        @import url(gis-test.css);
+    </style>
+    <script>
+        var fieldCount=0;
+        var gisViewer;
+        var widget;
+        var gisCallBackObject;
+      
+        function GisCallBacks()
+        {
+            this.getContainerDivName=function() {
+                return 'cesiumContainer';
+            };
+            
+            this.getLandsatWmsUrl=function() {
+                return '/ImageOps/landsat/wms';
+            };
+            
+            this.getMapServerBaseUrl=function() {
+                return '/ImageOps/gismapserver';
+            };
+            
+            this.getAerialBasePath=function() {
+                return 'P:/gisproduction/aerial';
+            };
+            
+            this.getViewerPath=function() {
+                return 'gis-viewer';
+            };
+            
+            this.getImageOpsBaseUrl=function() {
+                return "";
+            };
+            
+            this.mouseClick=function(mouseInfo) {
+                
+            };
+            
+            // wwjFieldUpdated()
+            this.notifyFieldUpdated=function() {
+                addMessage("field updated.");
+            };
+            
+            this.notifyFipsReceived=function(fipsCode) {
+                addMessage("fips:"+fipsCode);
+            };
+            
+            this.notifyNdviListReceived=function(ndviList) {
+                // ndviList is a string of 0..N triplets separated by commas lansatid,coveragePercent,metersPerPixel
+                addMessage("ndvi["+ndviList+"]");
+            };
+            
+            this.notifyAerialListReceived=function(aerialList) {
+                addMessage("aerial["+aerialList+"]");
+            };
+            
+            this.notifyYieldIdsReceived=function(yieldJson) {
+                addMessage("yieldJson:"+yieldJson);
+            };
+            
+            this.notifyError=function(message) {
+                console.log("GIS Viewer Error:"+message);
+            };
+        }
+        
+        function init()
+        {
+            gisCallBackObject=new GisCallBacks();
+            gisViewer=new WingScanGis();
+            gisViewer.init(gisCallBackObject);
+            widget=gisViewer.getWidget();
+            gisViewer.setEyePos(43.968,-93.554,1000);
+        }
+      
+        function videoMover()
+        {
+            videoLat+=0.00001;
+            if (videoLat>videoEndLat)
+                clearInterval(videoTimer);
+            else
+                setCenter(videoLat,videoLon);
+        }
+        
+        function windmill80Video()
+        {
+            videoTimer = setInterval(function(){videoMover()},100);
+
+            videoLat=43.964385;
+            videoLon=-93.551568;
+            setCenter(videoLat,videoLon);
+            videoEndLat=43.971518;
+        }
+        
+        function setEyePos()
+        {
+            var posString=document.getElementById("datafieldid").value;
+            var posTokens=posString.split(",");
+            var lat=44;
+            var lon=-94;
+            var altitude=3000;
+            if (posTokens.length>0)
+                lat=parseFloat(posTokens[0]);
+            
+            if (posTokens.length>1)
+                lon=parseFloat(posTokens[1]);
+            
+            if (posTokens.length>2)
+                altitude=parseFloat(posTokens[2]);
+            
+            gisViewer.setEyePos(lat,lon,altitude);
+        }
+        
+        function addMessage(newMessage)
+        {
+            var curMessage=document.getElementById("messages").value;
+            if (curMessage!=="")
+                curMessage+=",";
+            document.getElementById("messages").value=curMessage+newMessage;
+        }
+        
+        function enterFindFieldMode()
+        {
+            fieldCount=fieldCount+1;
+            document.getElementById("fieldid").value='field'+fieldCount;
+            var fieldId=document.getElementById("fieldid").value;
+            gisViewer.enterFindFieldMode(fieldId);
+        }
+
+        function enterCreateFieldMode()
+        {
+            fieldCount=fieldCount+1;
+            document.getElementById("fieldid").value='field'+fieldCount;
+            var fieldId=document.getElementById("fieldid").value;
+            gisViewer.enterCreateFieldMode(fieldId);
+        }
+        
+        function enterCreateHoleMode()
+        {
+            gisViewer.toggleCreateHoleMode();
+        }
+        
+        function enterRemoveHoleMode()
+        {
+            gisViewer.toggleRemoveHoleMode();
+        }
+        
+        function enterCreateZoneMode()
+        {
+            gisViewer.toggleCreateZoneMode();
+        }
+        
+        function enterRemoveZoneMode()
+        {
+            gisViewer.toggleRemoveZoneMode();
+        }
+        
+        function showIsFieldModified()
+        {
+            var modified=gisViewer.isFieldBoundaryModified();
+            addMessage("Field Modified:"+modified);
+        }
+        
+        function getFieldBoundary()
+        {
+            var fieldId=document.getElementById("fieldid").value;
+            document.getElementById("fieldboundary").value=gisViewer.getFieldBoundary(fieldId);
+        }
+        
+        function createStringFieldBoundary()
+        {
+            fieldCount=fieldCount+1;
+            document.getElementById("fieldid").value='field'+fieldCount;
+            var fieldId=document.getElementById("fieldid").value;
+            gisViewer.createFieldBoundary(fieldId,document.getElementById("fieldboundary").value);
+        }
+
+        function toggleEditing()
+        {
+            var isEditing=gisViewer.isSelectedFieldEditing();
+            gisViewer.setSelectedFieldEditing(!isEditing);
+        }
+        
+        function clearBoundaries()
+        {
+            gisViewer.clearBoundaries();
+        }
+
+        function setSelectedField()
+        {
+            var fieldId=document.getElementById("fieldid").value;
+            gisViewer.setSelectedField(fieldId);
+        }
+        
+        function showSoilMap()
+        {
+            gisViewer.showSoilMap();
+        }
+        
+        function hideSoilMap()
+        {
+            gisViewer.hideSoilMap();
+        }
+
+        function getFips()
+        {
+            gisViewer.getSelectedFieldFips(); // result returned through callback
+        }
+
+        function zoomFields()
+        {
+            gisViewer.zoomToFields();
+        }
+        
+        function showNdviList()
+        {
+            gisViewer.getNdviList(); // result returned through callback
+        }
+        
+        function clearMessages()
+        {
+            document.getElementById("messages").value="";
+        }
+
+        function clearBoundary()
+        {
+            document.getElementById("fieldboundary").value="";
+        }
+        
+        function showNdvi()
+        {
+            var ndviId=document.getElementById("datafieldid").value;
+            gisViewer.showNdvi(ndviId);
+        }
+        
+        function hideNdvi()
+        {
+            gisViewer.hideNdvi();
+        }
+        
+        function showAerialList()
+        {
+            gisViewer.getAerialList();
+        }
+
+        function showAerial()
+        {
+            var aerialId=document.getElementById("datafieldid").value;
+            gisViewer.showAerial(aerialId);
+        }
+        
+        function hideAerial()
+        {
+            gisViewer.hideAerial();
+        }
+        
+        function showFieldIds()
+        {
+            var fieldIds=gisViewer.getFieldIds();
+            addMessage("ids["+fieldIds+"]");
+        }
+
+        function showYieldIds()
+        {
+            gisViewer.getYieldList();
+        }
+        
+        function showYield()
+        {
+            var yieldRecord=JSON.parse(document.getElementById("datafieldid").value);
+            gisViewer.showYield(yieldRecord.id,yieldRecord.minLat,yieldRecord.minLng,yieldRecord.maxLat,yieldRecord.maxLng);
+        }
+        
+        function hideYield()
+        {
+            gisViewer.hideYield();
+        }
+    </script>
+</head>
+<body onload="init();">
+    <div id="cesiumContainer" style="width: 1024px; height: 768px"></div>
+    <br/>
+    <form>
+        Field ID: <input type="text" size="20" id="fieldid" value="field0">
+        Data: <input type="text" size="150" id="datafieldid" value="43.968,-93.554,1000">
+        <br/>
+        <input type="BUTTON" value="Set Location" onClick="setEyePos();"/>
+        <input type="BUTTON" value="Find field" onClick="enterFindFieldMode();"/>
+        <input type="BUTTON" value="Create field at point" onClick="enterCreateFieldMode();"/>
+        <input type="BUTTON" value="Create hole at point" onClick="enterCreateHoleMode();"/>
+        <input type="BUTTON" value="Remove hole at point" onClick="enterRemoveHoleMode();"/>
+        <input type="BUTTON" value="Create zone at point" onClick="enterCreateZoneMode();"/>
+        <input type="BUTTON" value="Remove zone at point" onClick="enterRemoveZoneMode();"/>
+        <br/>
+        <input type="BUTTON" value="Is Field Modified" onClick="showIsFieldModified();"/>
+        <input type="BUTTON" value="Get Field Boundary String" onClick="getFieldBoundary();"/>
+        <input type="BUTTON" value="Create Boundary from String" onClick="createStringFieldBoundary();"/>
+        <input type="BUTTON" value="Toggle editing" onClick="toggleEditing();"/>
+        <input type="BUTTON" value="Clear field boundaries" onClick="clearBoundaries();"/>
+        <input type="BUTTON" value="Set Selected Field" onClick="setSelectedField();"/>
+        <br/>
+        <input type="BUTTON" value="Show Soil Map" onClick="showSoilMap();"/>
+        <input type="BUTTON" value="Hide Soil Map" onClick="hideSoilMap();"/>
+        <input type="BUTTON" value="Get FIPs" onClick="getFips();"/>
+        <input type="BUTTON" value="Zoom to fields" onClick="zoomFields();"/>
+        <input type="BUTTON" value="Get NDVI List" onClick="showNdviList();"/>
+        <input type="BUTTON" value="Show NDVI" onClick="showNdvi();"/>
+        <input type="BUTTON" value="Hide NDVI" onClick="hideNdvi();"/>
+        <input type="BUTTON" value="Get Aerial List" onClick="showAerialList();"/>
+        <input type="BUTTON" value="Show Aerial" onClick="showAerial();"/>
+        <input type="BUTTON" value="Hide Aerial" onClick="hideAerial();"/>
+        <input type="BUTTON" value="Get Field IDs" onClick="showFieldIds();"/>
+        <br/>
+        <input type="BUTTON" value="Get yield JSON" onClick="showYieldIds();"/>
+        <input type="BUTTON" value="Show yield" onClick="showYield();"/>
+        <input type="BUTTON" value="Hide yield" onClick="hideYield();"/>
+        <br/>
+        <textarea id="messages" rows="5" cols="150"></textarea>
+        <input type="BUTTON" value="Clear" onClick="clearMessages();">
+        <br/>
+        <textarea id="fieldboundary" rows="5" cols="150"></textarea>
+        <input type="BUTTON" value="Clear" onClick="clearBoundary();">
+    </form>
+</body>
+</html>

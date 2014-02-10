@@ -126,7 +126,7 @@
 	<!-- properties controlling how to run the server-->
 	<property name="runServer.public" value="false" />
 	<property name="runServer.port" value="8080" />
-	<property name="runServer.allowedHosts" value="localhost,*.arcgisonline.com,tile.openstreetmap.org,otile1.mqcdn.com,oatile1.mqcdn.com,tile.stamen.com,*.virtualearth.net,mesonet.agron.iastate.edu" />
+	<property name="runServer.allowedHosts" value="localhost,*.arcgisonline.com,tile.openstreetmap.org,otile1.mqcdn.com,oatile1.mqcdn.com,tile.stamen.com,*.virtualearth.net,mesonet.agron.iastate.edu,data.worldwind.arc.nasa.gov,gis.superioredge.com" />
 
 	<!-- Inputs -->
 	<!-- this version should be set to the upcoming version, so it can be tagged without requiring a bump first -->

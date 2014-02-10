@@ -88,8 +88,20 @@ define([
 
         this._parameters = parameters;
 
-        this._tileWidth = 256;
-        this._tileHeight = 256;
+        if (defined(parameters.width)) {
+            this._tileWidth = parameters.width;
+        }
+        else {
+            this._tileWidth = 256;
+        }
+        
+        if (defined(parameters.height)) {
+            this._tileHeight = parameters.height;
+        }
+        else {
+            this._tileHeight = 256;
+        }
+        
         this._maximumLevel = description.maximumLevel; // undefined means no limit
 
         var extent = defaultValue(description.extent, Extent.MAX_VALUE);
